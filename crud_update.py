@@ -26,3 +26,27 @@ def update_produto(conexao, cursor, obj_produto):
     except Exception as e:
         print(f"Erro ao atualizar produto: {e}")
         conexao.rollback()
+
+def update_cliente(conexao, cursor, obj_cliente):
+
+    sql = """
+    UPDATE cliente 
+    SET ds_cliente = ?, 
+        ds_telefone = ?, 
+        ds_endereco = ?, 
+        dh_alteracao = CURRENT_TIMESTAMP
+    WHERE ds_cliente = '?'
+    """
+    valores = (
+        obj_cliente.ds_cliente,
+        obj_cliente.ds_telefone,
+        obj_cliente.ds_endereco,
+    )
+    
+    try:
+        cursor.execute(sql, valores)
+        conexao.commit()
+        print("Cliente atualizado com sucesso!")
+    except Exception as e:
+        print(f"Erro ao atualizar cliente: {e}")
+        conexao.rollback()
