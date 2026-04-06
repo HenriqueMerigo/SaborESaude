@@ -21,7 +21,7 @@ def delete_cliente(conexao, cursor, ds_cliente):
         conexao.rollback()
 
 def delete_pedido(conexao, cursor, id_pedido):
-    sql = "DELETE FROM pedido_produto WHERE id_pedido = ?"
+    sql = "DELETE FROM pedido WHERE id_pedido = ?"
     
     try:
         cursor.execute(sql, (id_pedido,))
@@ -29,4 +29,15 @@ def delete_pedido(conexao, cursor, id_pedido):
         print("Pedido excluído com sucesso!")
     except Exception as e:
         print(f"Erro ao excluir pedido: {e}")
+        conexao.rollback()
+
+def delete_pedido_produto(conexao, cursor, id_pedido):
+    sql = "DELETE FROM pedido_produto WHERE id_pedido = ?"
+    
+    try:
+        cursor.execute(sql, (id_pedido,))
+        conexao.commit()
+        print("Itens do pedido excluídos com sucesso!")
+    except Exception as e:
+        print(f"Erro ao excluir itens do pedido: {e}")
         conexao.rollback()

@@ -1,5 +1,6 @@
 def update_produto(conexao, cursor, obj_produto):
-
+    # 1. Removi as aspas do primeiro ?
+    # 2. Mantive o WHERE id_produto = ?
     sql = """
     UPDATE produto 
     SET ds_produto = ?, 
@@ -8,8 +9,10 @@ def update_produto(conexao, cursor, obj_produto):
         vl_estoque = ?, 
         vl_custo = ?, 
         vl_valor = ?
-    WHERE ds_produto = '?'
+    WHERE id_produto = ?
     """
+    
+    # 3. Adicionei o obj_produto.id_produto ao final da tupla!
     valores = (
         obj_produto.ds_produto,
         obj_produto.id_produto_categoria,
@@ -17,6 +20,7 @@ def update_produto(conexao, cursor, obj_produto):
         obj_produto.vl_estoque,
         obj_produto.vl_custo,
         obj_produto.vl_valor,
+        obj_produto.id_produto  # <--- ESSA LINHA É VITAL
     )
     
     try:
@@ -35,12 +39,13 @@ def update_cliente(conexao, cursor, obj_cliente):
         ds_telefone = ?, 
         ds_endereco = ?, 
         dh_alteracao = CURRENT_TIMESTAMP
-    WHERE ds_cliente = '?'
+    WHERE id_cliente = ?
     """
     valores = (
         obj_cliente.ds_cliente,
         obj_cliente.ds_telefone,
         obj_cliente.ds_endereco,
+        obj_cliente.id_cliente  # <--- ID do cliente para o WHERE
     )
     
     try:

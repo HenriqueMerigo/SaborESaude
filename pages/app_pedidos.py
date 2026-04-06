@@ -5,7 +5,7 @@ from database import conecta_db
 
 # Importações do CRUD (Assumindo que seguem o padrão dos outros módulos)
 from crud_create import insert_pedido, insert_pedido_produto
-from crud_delete import delete_pedido
+from crud_delete import delete_pedido, delete_pedido_produto
 from crud import pedido, pedido_produto
 
 def main():
@@ -119,19 +119,19 @@ def main():
             with col_add:
                 if st.button("Adicionar", use_container_width=True):
                     item = {
-                        "id_produto": sel_prod[0],
-                        "nome": sel_prod[1],
-                        "qtd": qtd,
-                        "preco": sel_prod[2],
-                        "subtotal": qtd * sel_prod[2]
+                        "ID Produto": sel_prod[0],
+                        "Produto": sel_prod[1],
+                        "Qtd": qtd,
+                        "Preço": sel_prod[2],
+                        "Subtotal": qtd * sel_prod[2]
                     }
                     st.session_state.carrinho.append(item)
                     st.toast(f"{sel_prod[1]} adicionado!")
 
             if st.session_state.carrinho:
                 df_cart = pd.DataFrame(st.session_state.carrinho)
-                st.table(df_cart[['nome', 'qtd', 'preco', 'subtotal']])
-                total_pedido = df_cart['subtotal'].sum()
+                st.table(df_cart[['Produto', 'Qtd', 'Preço', 'Subtotal']])
+                total_pedido = df_cart['Subtotal'].sum()
                 st.write(f"### Total do Pedido: R$ {total_pedido:.2f}")
 
         col_acao1, col_acao2 = st.columns(2)
@@ -143,7 +143,7 @@ def main():
                     try:
                         conn, cursor = conecta_db()
                         # 1. Criar objeto Pedido (Cabeçalho)
-                        total_pedido = sum(item['subtotal'] for item in st.session_state.carrinho)
+                        total_pedido = sum(item['Subtotal'] for item in st.session_state.carrinho)
                         obj_p = pedido(
                             id_pedido=None,
                             id_cliente=sel_cliente[0],
@@ -160,12 +160,12 @@ def main():
                             obj_item = pedido_produto(
                                 id_pedido_produto=None,
                                 id_pedido=id_gerado,
-                                id_produto=item['id_produto'],
-                                vl_quantidade=item['qtd'],
-                                vl_unitario=item['preco'],
-                                vl_total=item['subtotal']
+                                id_produto=item['ID Produto'],
+                                vl_quantidade=item['Qtd'],
+                                vl_unitario=item['Preço'],
+                                vl_total=item['Subtotal']
                             )
-                            insert_pedido_produto(obj_ped_prod=obj_item, conexao=conn, cursor=cursor)
+                            insert_pedido_produto(obj_pedido_produto=obj_item, conexao=conn, cursor=cursor)
                         
                         conn.close()
                         st.success(f"Pedido #{id_gerado} realizado com sucesso!")
@@ -196,13 +196,15 @@ def main():
 
     elif st.session_state.modo_pedido == 'pre-excluir':
         with st.status("Confirmar exclusão definitiva", expanded=True):
-            id_del = st.number_input("ID do Pedido para apagar:", min_value=1)
+            ids_pedidos = df_pedidos['ID'].tolist()
+            p_id = st.selectbox("ID do Pedido:", options=ids_pedidos)
             if st.button("Confirmar Exclusão", type="primary"):
                 try:
                     conn, cursor = conecta_db()
-                    delete_pedido(conexao=conn, cursor=cursor, id_pedido=id_del)
+                    delete_pedido(conexao=conn, cursor=cursor, id_pedido=p_id)
+                    delete_pedido_produto(conexao=conn, cursor=cursor, id_pedido=p_id)
                     conn.close()
-                    st.toast(f"Pedido {id_del} removido!", icon="✅")
+                    st.toast(f"Pedido {p_id} removido!", icon="✅")
                     st.session_state.modo_pedido = None
                     st.rerun()
                 except Exception as e:
